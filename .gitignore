@@ -39,3 +39,6 @@ nosetests.xml
 
 # General
 tags
+
+# OS X Desktop Services Store files
+.DS_Store
