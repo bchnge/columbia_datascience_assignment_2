@@ -66,8 +66,16 @@ def reformat(infile, outfile, errfile=sys.stderr):
     writer = csv.writer(outfile, delimiter='|')
 
     # Extract the first row of the file
+    allrows = list(reader)
+    header = allrows[0] # 1xC header row
 
     ## Reformat and write the header
+    index = 0	# tracks the reference to columns
+    for j in header:
+	header[index] = header[index].lower # convert to lowercase
+	header[index].replace(" ","_") # changes spaces to underscores
+        index+=1
+
 
     ## Reformat and write the body
     for row_index, row in enumerate(reader):
