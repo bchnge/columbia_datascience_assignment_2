@@ -81,8 +81,13 @@ def add_timeopen(
     Write later, if module interface is needed.
     """
     # Get the csv reader and writer.  Use these to read/write the files.
+    reader = csv.reader(infile)
+    writer = csv.writer(outfile)
 
     ## Extract, modify, and write the header
+    header = reader.next()
+    header.append('timeopen')
+    writer.writerow(header)
 
     # Set a variable called 'now', depending on whether we passed nowstring
     # or not.  Try using 'parse'
