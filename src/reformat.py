@@ -70,18 +70,14 @@ def reformat(infile, outfile, errfile=sys.stderr):
     header = allrows[0] # 1xC header row
 
     ## Reformat and write the header
-    index = 0	# tracks the reference to columns
-    for j in header:
-	header[index] = header[index].lower # convert to lowercase
-	header[index].replace(" ","_") # changes spaces to underscores
-        index+=1
-
+    header = _reformat_header(header)
 
     ## Reformat and write the body
     for row_index, row in enumerate(reader):
         # Ca
         try:
             # Call _checkrowlength, get a new_row, write it
+	    _checkrowlength(row, row_index, len(header))
             pass
         except common.BadDataError as e:
             # Write the error message
@@ -122,14 +118,16 @@ def _reformat_item(item):
     -------
     The reformatted item
     """
+    reformatted_item = item
     # Comma delimiters are replaced by pipes courtesy of the reader/writer
     #  delimiter choices.
-    #
+    
     # double quotes are replaced by the reader/writer (default) choice of
     # quote character
 
     # Replace pipes in the text body with nothing '' (no space)
-
+    reformatted_item.replace('|','')		
+ 
 
 
 def _reformat_header(header):
@@ -147,9 +145,13 @@ def _reformat_header(header):
     new_header = []
 
     # Loop through the header and populate new_header
-        # Replace spaces with underscores
+    index = 0	
+    	for j in header:
         # Change to lower case
-
+	new_header[index] = header[index].lower    
+	# Replace spaces with underscores	
+	new_header[index].replace(" ","_") # changes spaces to underscores
+	index+=1
     return new_header
 
 
