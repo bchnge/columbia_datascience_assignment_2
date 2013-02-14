@@ -72,18 +72,17 @@ def reformat(infile, outfile, errfile=sys.stderr):
     ## Reformat and write the header
     writer.writerow(_reformat_header(header))
 
+
     ## Reformat and write the body
     for row_index, row in enumerate(reader):
         # Ca
         try:
             # Call _checkrowlength, get a new_row, write it
 	    _checkrowlength(row, row_index, len(header))
-	    writer.writerow(_reformat_item(row))
-
+       	    writer.writerow(_reformat_item(row))
         except common.BadDataError as e:
             # Write the error message
-            print 'error message. should this be fed from _checkrowlength already?'
-
+	    sys.stderr.write(str(e))
 
 
 def _checkrowlength(row, row_index, len_header):
@@ -105,14 +104,9 @@ def _checkrowlength(row, row_index, len_header):
     # 'Row = %s\n' % (len(row), row_index, len_header, row)
     len_row = len(row)
     if len_row != len_header:
-    	message = 'BadDataError. %len_row items in row %row_index . Should have been %len_header . '  
-	# ????? BC: what is the third comment? Should this also be part of the stderror msg? And is the syntax for the stderror correct?
-	sys.stderr.write(message)
+	message = 'BadDataError. %len_row items in row %row_index . Should have been %len_header. Row = %row\n'  
 	raise common.BadDataError(message)
-    pass
-
-
-
+ 	
 
 def _reformat_item(item):
     """
