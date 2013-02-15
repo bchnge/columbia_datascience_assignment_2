@@ -81,8 +81,8 @@ def add_timeopen(
     Write later, if module interface is needed.
     """
     # Get the csv reader and writer.  Use these to read/write the files.
-    reader = csv.reader(infile)
-    writer = csv.writer(outfile)
+    reader = csv.reader(infile, delimiter=delimiter)
+    writer = csv.writer(outfile, delimiter=delimiter)
 
     ## Extract, modify, and write the header
     header = reader.next()
@@ -91,17 +91,26 @@ def add_timeopen(
 
     # Set a variable called 'now', depending on whether we passed nowstring
     # or not.  Try using 'parse'
+    if nowstring:
+        now = parse(nowstring)
 
     ## Get the indicies corresponding to columns that are needed to make
     ## timeopen
+    opened_idx = header.index('opened')
+    closed_idx = header.index('closed')
+    status_idx = header.index('status')
 
     ## Iterate through the file, add timeopen to each row, print
     for row in reader:
         try:
-            pass
+            timeopen = _get_timeopen(row, status_idx, opened_idx, closed_idx,
+                                     now)
+            row.append(timeopen)
+            writer.writerow(row)
             # Get timeopen by calling _get_timeopen, write the new row
         except common.BadDataError as e:
             # write an error message
+################ERROR############ERROR################
             pass
 
 
@@ -120,6 +129,12 @@ def _get_timeopen(row, status_idx, opened_idx, closed_idx, now):
     """
     # Call _checkstatus.  Exception will be raised if status is wrong.
     # It will be caught up one level.
+    _checkstatus(row[status_idx], row[opened_idx], row[closed_idx], row)
+    
+    if row[status_idx] == 'Closed':
+        return _get_timeopen_closedticket(row[opened_idx], row[closed_idx])
+    if row[status_idx] == 'Open':
+        return _get_timeopen_openticket(row[opened_idx], now)
 
 
 def _checkstatus(status, opendate, closedate, row):
@@ -157,6 +172,10 @@ def _get_timeopen_closedticket(opendate, closedate):
         MM/DD/YYYY HH:MM XM
     """
     # Convert opendate and closedate to datetime objects. Use 'parse'
+    opendate_datetime = parse(opendate)
+    closedate_datetime = parse(closedate)
+    timeopen = closedate_datetime - opendate_datetime
+    return int(timeopen.total_seconds())
 
 
 def _get_timeopen_openticket(opendate, now):
@@ -172,6 +191,9 @@ def _get_timeopen_openticket(opendate, now):
         Gives the current time
     """
     # Convert opendate to a datetime object
+    opendate_datetime = parse(opendate)
+    timeopen = now - opendate_datetime
+    return int(timeopen.total_seconds())
 
 
     
