@@ -95,10 +95,12 @@ def average(infile, outfile, delimiter=',', key=None, fieldnames=None):
     writer = csv.writer(outfile, delimiter = delimiter)
     data = list(reader)
         
+    #Save the key index and fieldnames index
     key_number = len(key)
     key_index = [data[0].index(i) for i in key]
     fieldnames_index = [data[0].index(i) for i in fieldnames]
 
+    #creat a newdata to save the keys and values in fieldnames
     newdata = []
     for i in data[1:]:
         if len(i) <= 0:
@@ -107,22 +109,19 @@ def average(infile, outfile, delimiter=',', key=None, fieldnames=None):
         tmp2 = [float(i[j]) for j in fieldnames_index]
         tmp = tmp1 + tmp2
         newdata.append(tmp)
-
-    groups = []
-    uniquekey_values = []
     
+    #Save the keys in my_result, which would be written in the csv 
     my_result = []
     my_result.append('key')
     for i in range(len(fieldnames_index)):
         my_result.append(data[0][fieldnames_index[i]] + '_ave')
     writer.writerow(my_result)
-    
-    group_num = len(groups)
-    
+        
+    #use the groupby function to calculte the group average for each group
     for k,g in groupby(newdata, lambda x:x[:key_number]):
         g = list(g)
         my_result = [g[0][0]]
-        tmpavg = _get_group_ave(g, range(key_number, len(g[0])))
+        tmpavg = _get_group_ave(g, range(key_number, len(g[0])))  #Here is the function to calculate the average in group g
         my_result += tmpavg
         writer.writerow(my_result)
 
