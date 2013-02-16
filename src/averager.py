@@ -91,49 +91,40 @@ def average(infile, outfile, delimiter=',', key=None, fieldnames=None):
     # Get the csv reader and writer.  Use these to read/write the files.
 
     ## Compute the average for each group and print
-    data = list(csv.reader(infile,delimiter=delimiter))
+    reader = csv.reader(infile,delimiter=delimiter)
+    writer = csv.writer(outfile, delimiter = delimiter)
+    data = list(reader)
+        
     key_number = len(key)
-    key_index = []
-    for i in key:
-        key_index.append(data[0].index(i))
-    fieldnames_index = []
-    for i in fieldnames:
-        fieldnames_index.append(data[0].index(i))
+    key_index = [data[0].index(i) for i in key]
+    fieldnames_index = [data[0].index(i) for i in fieldnames]
 
-    newdata = [];
+    newdata = []
     for i in data[1:]:
-        if len(i)<=0:
+        if len(i) <= 0:
             break
-        tmp = []
-        for j in key_index:
-            tmp.append(i[j])
-        for j in fieldnames_index:
-            tmp.append(float(i[j]))
+        tmp1 = [i[j] for j in key_index]
+        tmp2 = [float(i[j]) for j in fieldnames_index]
+        tmp = tmp1 + tmp2
         newdata.append(tmp)
-
 
     groups = []
     uniquekey_values = []
     
-    for k,g in groupby(newdata,lambda x:x[:key_number]):
-        groups.append(list(g))
-        uniquekey_values.append(k)
-    
-    result = 'key'
+    my_result = []
+    my_result.append('key')
     for i in range(len(fieldnames_index)):
-        result = result + delimiter + data[0][fieldnames_index[i]] + '_ave'
-    result += '\r\n'
+        my_result.append(data[0][fieldnames_index[i]] + '_ave')
+    writer.writerow(my_result)
     
     group_num = len(groups)
-    for  g in groups:
-        result += g[0][0]
-        for i in range(len(fieldnames_index)):
-            tmp = [x[key_number+i] for x in g]
-            tmpavg = sum(tmp)/len(g)
-            result += delimiter + str(tmpavg)
-        result +='\r\n'
-    outfile.write(result)
-        
+    
+    for k,g in groupby(newdata, lambda x:x[:key_number]):
+        g = list(g)
+        my_result = [g[0][0]]
+        tmpavg = _get_group_ave(g, range(key_number, len(g[0])))
+        my_result += tmpavg
+        writer.writerow(my_result)
 
 
 def _get_group_ave(group, field_idx):
@@ -149,7 +140,6 @@ def _get_group_ave(group, field_idx):
     """
     # The goal is to populate this list then use it to compute the average
     group_sums = [0] * len(field_idx)
-
     
     # Loop through the group, keeping track of how many members there are
     for member_count, member in enumerate(group):
