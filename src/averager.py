@@ -120,7 +120,7 @@ def average(infile, outfile, delimiter=',', key=None, fieldnames=None):
     #use the groupby function to calculte the group average for each group
     for k,g in groupby(newdata, lambda x:x[:key_number]):
         g = list(g)
-        my_result = [g[0][0]]
+        my_result = g[0][:key_number]
         tmpavg = _get_group_ave(g, range(key_number, len(g[0])))  #Here is the function to calculate the average in group g
         my_result += tmpavg
         writer.writerow(my_result)
