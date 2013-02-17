@@ -66,18 +66,24 @@ def reformat(infile, outfile, errfile=sys.stderr):
     writer = csv.writer(outfile, delimiter='|')
 
     # Extract the first row of the file
+    header = reader.next()
 
     ## Reformat and write the header
+    writer.writerow(_reformat_header(header))
 
     ## Reformat and write the body
     for row_index, row in enumerate(reader):
-        # Ca
         try:
             # Call _checkrowlength, get a new_row, write it
-            pass
+            _checkrowlength(row, row_index, len(header))
+            new_row = []
+            for item in row:
+                new_item = _reformat_item(item)
+                new_row.append(new_item)
+            writer.writerow(new_row)
         except common.BadDataError as e:
             # Write the error message
-            pass
+            errfile.write(e.message)
 
 
 def _checkrowlength(row, row_index, len_header):
@@ -97,6 +103,10 @@ def _checkrowlength(row, row_index, len_header):
     # Your stderr message should be:
     # message = 'BadDataError. %d items in row %d.  Should have been %d. '\
     # 'Row = %s\n' % (len(row), row_index, len_header, row)
+    len_row = len(row)
+    if len(row) != len_header:
+        raise common.BadDataError('BadDataError. %d items in row %d.  Should have been %d. '\
+                                  'Row = %s\n' % (len(row), row_index, len_header, row))
 
 
 def _reformat_item(item):
@@ -114,15 +124,18 @@ def _reformat_item(item):
     -------
     The reformatted item
     """
+
     # Comma delimiters are replaced by pipes courtesy of the reader/writer
     #  delimiter choices.
-    #
+    
     # double quotes are replaced by the reader/writer (default) choice of
     # quote character
 
     # Replace pipes in the text body with nothing '' (no space)
-
-
+    reformatted_item = item.replace('|','')		
+    # Now reformat all comma delimiters to pipes
+    reformatted_item.replace(',','|')
+    return reformatted_item
 
 def _reformat_header(header):
     """
@@ -139,9 +152,11 @@ def _reformat_header(header):
     new_header = []
 
     # Loop through the header and populate new_header
-        # Replace spaces with underscores
-        # Change to lower case
-
+    for j in header:
+        # Replace spaces with underscores	
+        j = j.replace(" ","_")
+        # Convert to lowercase
+        new_header.append(j.lower())    
     return new_header
 
 
