@@ -86,11 +86,22 @@ def subsample(infile, outfile, subsample_rate=0.01, delimiter=',', seed=None):
         randomseed(seed)
 
     ## Get the csv reader and writer.  Use these to read/write the files.
+	#file_in = open(infile,"r")	
+	reader = csv.reader(infile, delimiter = delimiter)	
+	writer = csv.writer(outfile, delimiter = delimiter)
+
 
     ## Extract and write the header
-    
-    ## Iterate through the file and print a selection of rows
+	header = reader.next()
+	writer.writerow(header)	
 
+
+    ## Iterate through the file and print a selection of rows
+	
+	for row in reader:
+		if rand(1) < subsample_rate:
+			writer.writerow(row)
+	
 
 if __name__=='__main__':
     main()
