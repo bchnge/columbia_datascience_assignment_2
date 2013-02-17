@@ -14,8 +14,8 @@ SECONDSINADAY = 24 * 60 * 60
 def main():
     r"""
     Reads a SF 311 case file, appends a 'timeopen' column giving the time
-    (in minutes) a case was open.  Prints to stdout.  
-    
+    (in minutes) a case was open.  Prints to stdout.
+
     If the case is still
     open, prints the time it has been open.
 
@@ -75,29 +75,43 @@ def main():
     common.close_files(infile, outfile)
 
 
-def add_timeopen(
-    infile, outfile, delimiter=',', nowstring=None, errfile=sys.stderr):
+def add_timeopen(infile, outfile, delimiter=',', nowstring=None,
+                 errfile=sys.stderr):
     """
     Write later, if module interface is needed.
     """
     # Get the csv reader and writer.  Use these to read/write the files.
+    reader = csv.reader(infile, delimiter=delimiter)
+    writer = csv.writer(outfile, delimiter=delimiter)
 
     ## Extract, modify, and write the header
+    header = reader.next()
+    header.append('timeopen')
+    writer.writerow(header)
 
     # Set a variable called 'now', depending on whether we passed nowstring
     # or not.  Try using 'parse'
+    if nowstring:
+        now = parse(nowstring)
+    else:
+        now = None
 
     ## Get the indicies corresponding to columns that are needed to make
     ## timeopen
+    opened_idx = header.index('opened')
+    closed_idx = header.index('closed')
+    status_idx = header.index('status')
 
     ## Iterate through the file, add timeopen to each row, print
     for row in reader:
         try:
-            pass
+            timeopen = _get_timeopen(row, status_idx, opened_idx, closed_idx,
+                                     now)
+            row.append(timeopen)
+            writer.writerow(row)
             # Get timeopen by calling _get_timeopen, write the new row
         except common.BadDataError as e:
-            # write an error message
-            pass
+            errfile.write(e.args[0])
 
 
 def _get_timeopen(row, status_idx, opened_idx, closed_idx, now):
@@ -115,11 +129,17 @@ def _get_timeopen(row, status_idx, opened_idx, closed_idx, now):
     """
     # Call _checkstatus.  Exception will be raised if status is wrong.
     # It will be caught up one level.
+    _checkstatus(row[status_idx], row[opened_idx], row[closed_idx], row)
+
+    if row[status_idx] == 'Closed':
+        return _get_timeopen_closedticket(row[opened_idx], row[closed_idx])
+    if row[status_idx] == 'Open':
+        return _get_timeopen_openticket(row[opened_idx], now)
 
 
 def _checkstatus(status, opendate, closedate, row):
     """
-    We should see closedate if and only if status == 'Closed'.  
+    We should see closedate if and only if status == 'Closed'.
 
     Also check to make sure status is either Open or Closed.
 
@@ -134,9 +154,25 @@ def _checkstatus(status, opendate, closedate, row):
     # under which you may have to set 'allok = False'
     allok = True
 
+    # These test to make sure there is a closedate if and only if status is
+    # 'Closed'
+    if status != 'Closed' and closedate:
+        allok = False
+    if status == 'Closed' and not closedate:
+        allok = False
+
+    # This tests to make sure status makes sense.
+    if status != 'Closed' and status != 'Open':
+        allok = False
+
+    # This tests to make sure there is an opendate.
+    if not opendate:
+        allok = False
+
     # if not allok raise an exception and give an error message
     if not allok:
-        pass
+        raise common.BadDataError('BadDataError.  Bad status. row = %s\n'
+                                  % row)
 
 
 def _get_timeopen_closedticket(opendate, closedate):
@@ -152,6 +188,10 @@ def _get_timeopen_closedticket(opendate, closedate):
         MM/DD/YYYY HH:MM XM
     """
     # Convert opendate and closedate to datetime objects. Use 'parse'
+    opendate_datetime = parse(opendate)
+    closedate_datetime = parse(closedate)
+    timeopen = closedate_datetime - opendate_datetime
+    return int(timeopen.total_seconds())
 
 
 def _get_timeopen_openticket(opendate, now):
@@ -167,12 +207,10 @@ def _get_timeopen_openticket(opendate, now):
         Gives the current time
     """
     # Convert opendate to a datetime object
+    opendate_datetime = parse(opendate)
+    timeopen = now - opendate_datetime
+    return int(timeopen.total_seconds())
 
 
-    
-
-
-if __name__=='__main__':
+if __name__ == '__main__':
     main()
-
-
