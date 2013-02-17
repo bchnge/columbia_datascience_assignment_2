@@ -2,7 +2,6 @@
 from optparse import OptionParser
 import sys
 import csv
-import pdb
 
 import homework_02.src.common as common
 
@@ -37,7 +36,6 @@ def main():
         help="Write to this file rather than stdout.  [default: %default]",
         action="store", dest='outfilename', default=None)
 
-    pdb.set_trace()
     (options, args) = parser.parse_args()
 
     ### Parse args
@@ -66,9 +64,6 @@ def main():
 
 
 def cut_file(infile, outfile, delimiter=',', keep_list=None):
-
-    # pdb.set_trace()
-
     """
     Write later, if module interface is needed.
     """
