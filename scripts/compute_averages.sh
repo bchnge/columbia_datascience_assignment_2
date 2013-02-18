@@ -1,3 +1,4 @@
+#!/bin/bash
 # Script for computing averages of the dataset
 
 SRC=../src
@@ -9,8 +10,9 @@ DATA=../data
 #
 
 cat $DATA/Case_Data_from_San_Francisco_311.csv \
+    | python $SRC/subsample.py -r .0001 \
     | python $SRC/reformat.py \
-    | python $SRC/timeopen.py \
-    | body sort -k 1,4 -k 2,8 \
-    | python $SRC/averager.py -k category -f timeopen \
+    | python $SRC/timeopen.py -d \| \
+    | body sort -k 1 \
+    | python $SRC/averager.py -d \| -k category -f timeopen \
     > outfile.csv
