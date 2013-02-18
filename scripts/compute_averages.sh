@@ -10,9 +10,8 @@ DATA=../data
 #
 
 cat $DATA/Case_Data_from_San_Francisco_311.csv \
-    | python $SRC/subsample.py -r .0001 \
     | python $SRC/reformat.py \
     | python $SRC/timeopen.py -d \| \
-    | body sort -k 1 \
-    | python $SRC/averager.py -d \| -k category -f timeopen \
+    | body sort -k4 -k8 \
+    | python $SRC/averager.py -d \| -k status,category -f timeopen \
     > outfile.csv
