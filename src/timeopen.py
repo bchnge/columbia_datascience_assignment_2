@@ -94,7 +94,7 @@ def add_timeopen(infile, outfile, delimiter=',', nowstring=None,
     if nowstring:
         now = parse(nowstring)
     else:
-        now = None
+        now = datetime.now()
 
     ## Get the indicies corresponding to columns that are needed to make
     ## timeopen
