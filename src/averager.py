@@ -2,7 +2,6 @@
 from optparse import OptionParser
 import sys
 import csv
-import pdb
 from itertools import groupby
 import copy
 
