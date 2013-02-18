@@ -148,7 +148,6 @@ def _get_group_ave(group, field_idx):
     
     # Loop through the group, keeping track of how many members there are
     for member_count, member in enumerate(group):
-        pass
         # Add this group's values to the appropriate index of group_sums
         for i in range(len(field_idx)):
             group_sums[i] += member[field_idx[i]]
