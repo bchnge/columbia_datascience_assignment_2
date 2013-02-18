@@ -9,8 +9,8 @@ DATA=../data
 # You will have to use the body utility in conjunction with something
 #
 
-cat $DATA/Case_Data_from_San_Francisco_311.csv \
+head -n 1000 $DATA/Case_Data_from_San_Francisco_311.csv \
     | python $SRC/reformat.py \
     | python $SRC/timeopen.py -d \| \
     | body sort --field-separator=\| -k4 -k8 \
-    | python $SRC/averager.py -d \| -k status,category -f timeopen
+    | python $SRC/averager.py -d \| --key=status,category --fieldnames=timeopen
