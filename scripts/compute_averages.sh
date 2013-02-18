@@ -12,6 +12,6 @@ DATA=../data
 cat $DATA/Case_Data_from_San_Francisco_311.csv \
     | python $SRC/reformat.py \
     | python $SRC/timeopen.py -d \| \
-    | body sort -k4 -k8 \
-    | python $SRC/averager.py -d \| -k status,category -f timeopen \
+    | body sort -t \| +7 -8 +3 -4 \
+    | python $SRC/averager.py -d \| -k category,status -f timeopen \
     > outfile.csv

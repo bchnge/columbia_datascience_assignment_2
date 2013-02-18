@@ -114,8 +114,7 @@ def average(infile, outfile, delimiter=',', key=None, fieldnames=None):
             tmp1 = [i[j] for j in key_index]
             tmp = tmp1 + tmp2
             newdata.append(tmp)
-    print 'There are', delete_number, 'records deleted because of exception'
-
+    
     #Save the keys in my_result, which would be written in the csv 
     my_result = []
     my_result.append('key')
