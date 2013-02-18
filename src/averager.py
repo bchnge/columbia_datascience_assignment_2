@@ -102,14 +102,21 @@ def average(infile, outfile, delimiter=',', key=None, fieldnames=None):
 
     #creat a newdata to save the keys and values in fieldnames
     newdata = []
+    delete_number = 0
     for i in data[1:]:
         if len(i) <= 0:
             break
-        tmp1 = [i[j] for j in key_index]
-        tmp2 = [float(i[j]) for j in fieldnames_index]
-        tmp = tmp1 + tmp2
-        newdata.append(tmp)
-    
+        try:
+            tmp2 = [float(i[j]) for j in fieldnames_index]
+        except ValueError:  #If an entry cannot be converted to float, delete it
+            delete_number += 1
+            continue
+        else:
+            tmp1 = [i[j] for j in key_index]
+            tmp = tmp1 + tmp2
+            newdata.append(tmp)
+    print 'There are', delete_number, 'records deleted because of exception'
+
     #Save the keys in my_result, which would be written in the csv 
     my_result = []
     my_result.append('key')
