@@ -90,6 +90,46 @@ def average(infile, outfile, delimiter=',', key=None, fieldnames=None):
     # Get the csv reader and writer.  Use these to read/write the files.
 
     ## Compute the average for each group and print
+    reader = csv.reader(infile,delimiter=delimiter)
+    writer = csv.writer(outfile, delimiter = delimiter)
+    data = list(reader)
+        
+    #Save the key index and fieldnames index
+    key_number = len(key)
+    key_index = [data[0].index(i) for i in key]
+    fieldnames_index = [data[0].index(i) for i in fieldnames]
+
+    #creat a newdata to save the keys and values in fieldnames
+    newdata = []
+    delete_number = 0
+    for i in data[1:]:
+        if len(i) <= 0:
+            break
+        try:
+            tmp2 = [float(i[j]) for j in fieldnames_index]
+        except ValueError:  #If an entry cannot be converted to float, delete it
+            delete_number += 1
+            continue
+        else:
+            tmp1 = [i[j] for j in key_index]
+            tmp = tmp1 + tmp2
+            newdata.append(tmp)
+    print 'There are', delete_number, 'records deleted because of exception'
+
+    #Save the keys in my_result, which would be written in the csv 
+    my_result = []
+    my_result.append('key')
+    for i in range(len(fieldnames_index)):
+        my_result.append(data[0][fieldnames_index[i]] + '_ave')
+    writer.writerow(my_result)
+        
+    #use the groupby function to calculte the group average for each group
+    for k,g in groupby(newdata, lambda x:x[:key_number]):
+        g = list(g)
+        my_result = g[0][:key_number]
+        tmpavg = _get_group_ave(g, range(key_number, len(g[0])))  #Here is the function to calculate the average in group g
+        my_result += tmpavg
+        writer.writerow(my_result)
 
 
 def _get_group_ave(group, field_idx):
@@ -105,13 +145,16 @@ def _get_group_ave(group, field_idx):
     """
     # The goal is to populate this list then use it to compute the average
     group_sums = [0] * len(field_idx)
-
+    
     # Loop through the group, keeping track of how many members there are
     for member_count, member in enumerate(group):
-        pass
         # Add this group's values to the appropriate index of group_sums
-    
+        for i in range(len(field_idx)):
+            group_sums[i] += member[field_idx[i]]
+    result = [float(x)/len(group) for x in group_sums]
+    return result
 
 
 if __name__=='__main__':
     main()
+
